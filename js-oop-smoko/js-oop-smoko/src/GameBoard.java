@@ -26,6 +26,8 @@ public class GameBoard extends JPanel implements ActionListener {
     private int food_y;
     private int enemy_x;
     private int enemy_y;
+    private int movingFood_x;
+    private int movingFood_y;
     private boolean left = false;
     private boolean right = true;
     private boolean up = false;
@@ -57,11 +59,24 @@ public class GameBoard extends JPanel implements ActionListener {
             inGame = false;
         }
     }
+    private void checkMovingFood() {
+        if ((x[0] == movingFood_x) && (y[0] == movingFood_y)) {
+            dots = dots + 2;
+            points = points + 15;
+            locateMovingFood();
+        }
+    }
     private void locateFood() {
         int r = (int) (Math.random() * randomPosition);
         food_x = ((r * dotSize));
         r = (int) (Math.random() * randomPosition);
         food_y = ((r * dotSize));
+    }
+    private void locateMovingFood() {
+        int a = (int) (Math.random() * randomPosition);
+        movingFood_x = ((a * dotSize));
+        a = (int) (Math.random() * randomPosition);
+        movingFood_y = ((a * dotSize));
     }
     private void locateEnemy() {
         int x = (int) (Math.random() * randomPosition);
@@ -89,7 +104,7 @@ public class GameBoard extends JPanel implements ActionListener {
 	    }
 	    private void collision() {
 	        for (int z = dots; z > 0; z--) {
-	            if ((z > 4) && (x[0] == x[z]) && (y[0] == y[z])) {
+	            if ((z > 1) && (x[0] == x[z]) && (y[0] == y[z])) {
 	                inGame = false;
 	            }
 	        }
@@ -105,9 +120,6 @@ public class GameBoard extends JPanel implements ActionListener {
 	        if (x[0] < 0) {
 	            inGame = false;
 	        }
-//	        if(x[0] == enemy_x && y[0] == enemy_y) {
-//	        	inGame = false;
-//	        }
 	        if (!inGame) {
 	            timer.stop();
 	        }
@@ -145,6 +157,9 @@ public class GameBoard extends JPanel implements ActionListener {
 	    }
 	 private void doDrawing(Graphics g) {
 	        if (inGame) {
+	        	//MOVING FOOD//
+	        	g.setColor(Color.WHITE);
+		        g.fillOval(movingFood_x,movingFood_y,dotSize,dotSize);
 	        	//ENEMY//
 	        	g.setColor(Color.YELLOW);
 		        g.fillRect(enemy_x,enemy_y,dotSize,dotSize);
@@ -182,12 +197,18 @@ public class GameBoard extends JPanel implements ActionListener {
 	            y[z] = 50;
 	        }
 	        locateFood();
+	        locateEnemy();
+	        locateMovingFood();
 	        timer = new Timer(delay, this);
 	        timer.start();
 	    }
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
+		if(points >= 300) {
+			inGame = false;
+		}
 		if (inGame) {
+			checkMovingFood();
 			checkEnemy();
             checkFood();
             collision();
